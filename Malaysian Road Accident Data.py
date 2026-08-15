@@ -26,16 +26,16 @@ def load_and_clean_data():
     print("[INFO] Loading datasets...")
     
     # 1. Load Vehicle Dataset
-    df_veh = pd.read_csv('m-20210325040425_202103250404250_number-of-road-accidents-reported-by-type-of-vehicle-malaysia-2.csv')
+    df_veh = pd.read_csv('dataset/m-20210325040425_202103250404250_number-of-road-accidents-reported-by-type-of-vehicle-malaysia-2.csv')
     df_veh['Type of Vehicle'] = df_veh['Type of Vehicle'].str.strip()
     
     # 2. Load Injury/Casualty Dataset
-    df_inj = pd.read_csv('m-20210329034857_202307060208460_2000-2021-number-of-deaths-and-injuries-in-road-accidents-repor.csv')
+    df_inj = pd.read_csv('dataset/m-20210329034857_202307060208460_2000-2021-number-of-deaths-and-injuries-in-road-accidents-repor.csv')
     df_inj['Type of road user'] = df_inj['Type of road user'].str.strip()
     df_inj['Condition'] = df_inj['Condition'].str.strip()
     
     # 3. Load State Statistics Dataset
-    df_stat = pd.read_csv('STATISTIK KEMALANGAN, KEMALANGAN MAUT DAN KEMATIAN.csv')
+    df_stat = pd.read_csv('dataset/STATISTIK KEMALANGAN, KEMALANGAN MAUT DAN KEMATIAN.csv')
     df_stat['Negeri'] = df_stat['Negeri'].str.strip()
     df_stat['Klasifikasi Kemalangan'] = df_stat['Klasifikasi Kemalangan'].str.strip()
     
@@ -166,7 +166,7 @@ def process_rq3(df_stat):
     })
     
     # 2. Load and filter external population dataset
-    df_pop = pd.read_csv('state_population_2019.csv')
+    df_pop = pd.read_csv('dataset/state_population_2019.csv')
     df_pop['date'] = pd.to_datetime(df_pop['date'])
     
     df_pop_2019 = df_pop[
