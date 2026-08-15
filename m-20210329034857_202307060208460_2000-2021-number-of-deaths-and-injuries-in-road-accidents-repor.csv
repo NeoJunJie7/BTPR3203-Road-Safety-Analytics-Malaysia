@@ -1,0 +1,361 @@
+Type of road user,Year,Condition,Value
+Pedestrians,2000,Deaths,721
+Pedestrians,2000,Injuries,3895
+Pedestrians,2001,Deaths,645
+Pedestrians,2001,Injuries,3721
+Pedestrians,2002,Deaths,650
+Pedestrians,2002,Injuries,3865
+Pedestrians,2003,Deaths,683
+Pedestrians,2003,Injuries,4049
+Pedestrians,2004,Deaths,675
+Pedestrians,2004,Injuries,3980
+Pedestrians,2005,Deaths,601
+Pedestrians,2005,Injuries,3523
+Pedestrians,2006,Deaths,595
+Pedestrians,2006,Injuries,2204
+Pedestrians,2007,Deaths,636
+Pedestrians,2007,Injuries,2102
+Pedestrians,2008,Deaths,598
+Pedestrians,2008,Injuries,1801
+Pedestrians,2009,Deaths,589
+Pedestrians,2009,Injuries,1778
+Pedestrians,2010,Deaths,626
+Pedestrians,2010,Injuries,1535
+Pedestrians,2011,Deaths,530
+Pedestrians,2011,Injuries,1329
+Pedestrians,2012,Deaths,530
+Pedestrians,2012,Injuries,1099
+Pedestrians,2013,Deaths,455
+Pedestrians,2013,Injuries,783
+Pedestrians,2014,Deaths,515
+Pedestrians,2014,Injuries,841
+Pedestrians,2015,Deaths,20
+Pedestrians,2015,Injuries,115
+Pedestrians,2016,Deaths,29
+Pedestrians,2016,Injuries,109
+Pedestrians,2017,Deaths,23
+Pedestrians,2017,Injuries,53
+Pedestrians,2018,Deaths,39
+Pedestrians,2018,Injuries,103
+Pedestrians,2019,Deaths,27
+Pedestrians,2019,Injuries,69
+Cyclists,2000,Deaths,236
+Cyclists,2000,Injuries,2005
+Cyclists,2001,Deaths,232
+Cyclists,2001,Injuries,2065
+Cyclists,2002,Deaths,235
+Cyclists,2002,Injuries,1971
+Cyclists,2003,Deaths,248
+Cyclists,2003,Injuries,2059
+Cyclists,2004,Deaths,283
+Cyclists,2004,Injuries,2354
+Cyclists,2005,Deaths,213
+Cyclists,2005,Injuries,1565
+Cyclists,2006,Deaths,228
+Cyclists,2006,Injuries,962
+Cyclists,2007,Deaths,183
+Cyclists,2007,Injuries,796
+Cyclists,2008,Deaths,191
+Cyclists,2008,Injuries,627
+Cyclists,2009,Deaths,202
+Cyclists,2009,Injuries,583
+Cyclists,2010,Deaths,192
+Cyclists,2010,Injuries,492
+Cyclists,2011,Deaths,160
+Cyclists,2011,Injuries,347
+Cyclists,2012,Deaths,516
+Cyclists,2012,Injuries,360
+Cyclists,2013,Deaths,151
+Cyclists,2013,Injuries,236
+Cyclists,2014,Deaths,117
+Cyclists,2014,Injuries,162
+Cyclists,2015,Deaths,130
+Cyclists,2015,Injuries,272
+Cyclists,2016,Deaths,142
+Cyclists,2016,Injuries,273
+Cyclists,2017,Deaths,113
+Cyclists,2017,Injuries,251
+Cyclists,2018,Deaths,88
+Cyclists,2018,Injuries,180
+Cyclists,2019,Deaths,82
+Cyclists,2019,Injuries,143
+Motorcar drivers,2000,Deaths,543
+Motorcar drivers,2000,Injuries,4038
+Motorcar drivers,2001,Deaths,527
+Motorcar drivers,2001,Injuries,4335
+Motorcar drivers,2002,Deaths,558
+Motorcar drivers,2002,Injuries,4442
+Motorcar drivers,2003,Deaths,682
+Motorcar drivers,2003,Injuries,5208
+Motorcar drivers,2004,Deaths,1208
+Motorcar drivers,2004,Injuries,8340
+Motorcar drivers,2005,Deaths,719
+Motorcar drivers,2005,Injuries,4525
+Motorcar drivers,2006,Deaths,677
+Motorcar drivers,2006,Injuries,2858
+Motorcar drivers,2007,Deaths,697
+Motorcar drivers,2007,Injuries,2817
+Motorcar drivers,2008,Deaths,801
+Motorcar drivers,2008,Injuries,2502
+Motorcar drivers,2009,Deaths,827
+Motorcar drivers,2009,Injuries,2729
+Motorcar drivers,2010,Deaths,1421
+Motorcar drivers,2010,Injuries,3785
+Motorcar drivers,2011,Deaths,828
+Motorcar drivers,2011,Injuries,1972
+Motorcar drivers,2012,Deaths,850
+Motorcar drivers,2012,Injuries,1909
+Motorcar drivers,2013,Deaths,831
+Motorcar drivers,2013,Injuries,1469
+Motorcar drivers,2014,Deaths,794
+Motorcar drivers,2014,Injuries,1332
+Motorcar drivers,2015,Deaths,223
+Motorcar drivers,2015,Injuries,244
+Motorcar drivers,2016,Deaths,186
+Motorcar drivers,2016,Injuries,217
+Motorcar drivers,2017,Deaths,199
+Motorcar drivers,2017,Injuries,220
+Motorcar drivers,2018,Deaths,192
+Motorcar drivers,2018,Injuries,157
+Motorcar drivers,2019,Deaths,182
+Motorcar drivers,2019,Injuries,185
+Lorry drivers,2000,Deaths,114
+Lorry drivers,2000,Injuries,740
+Lorry drivers,2001,Deaths,107
+Lorry drivers,2001,Injuries,667
+Lorry drivers,2002,Deaths,128
+Lorry drivers,2002,Injuries,808
+Lorry drivers,2003,Deaths,154
+Lorry drivers,2003,Injuries,883
+Lorry drivers,2004,Deaths,233
+Lorry drivers,2004,Injuries,1226
+Lorry drivers,2005,Deaths,132
+Lorry drivers,2005,Injuries,698
+Lorry drivers,2006,Deaths,142
+Lorry drivers,2006,Injuries,459
+Lorry drivers,2007,Deaths,130
+Lorry drivers,2007,Injuries,420
+Lorry drivers,2008,Deaths,129
+Lorry drivers,2008,Injuries,358
+Lorry drivers,2009,Deaths,148
+Lorry drivers,2009,Injuries,307
+Lorry drivers,2010,Deaths,202
+Lorry drivers,2010,Injuries,419
+Lorry drivers,2011,Deaths,176
+Lorry drivers,2011,Injuries,264
+Lorry drivers,2012,Deaths,134
+Lorry drivers,2012,Injuries,256
+Lorry drivers,2013,Deaths,155
+Lorry drivers,2013,Injuries,169
+Lorry drivers,2014,Deaths,164
+Lorry drivers,2014,Injuries,187
+Lorry drivers,2015,Deaths,1358
+Lorry drivers,2015,Injuries,2352
+Lorry drivers,2016,Deaths,1489
+Lorry drivers,2016,Injuries,2325
+Lorry drivers,2017,Deaths,1269
+Lorry drivers,2017,Injuries,2045
+Lorry drivers,2018,Deaths,1167
+Lorry drivers,2018,Injuries,1472
+Lorry drivers,2019,Deaths,1253
+Lorry drivers,2019,Injuries,1657
+Taxi/Bus drivers,2000,Deaths,10
+Taxi/Bus drivers,2000,Injuries,105
+Taxi/Bus drivers,2001,Deaths,8
+Taxi/Bus drivers,2001,Injuries,120
+Taxi/Bus drivers,2002,Deaths,16
+Taxi/Bus drivers,2002,Injuries,121
+Taxi/Bus drivers,2003,Deaths,14
+Taxi/Bus drivers,2003,Injuries,106
+Taxi/Bus drivers,2004,Deaths,69
+Taxi/Bus drivers,2004,Injuries,512
+Taxi/Bus drivers,2005,Deaths,19
+Taxi/Bus drivers,2005,Injuries,87
+Taxi/Bus drivers,2006,Deaths,65
+Taxi/Bus drivers,2006,Injuries,265
+Taxi/Bus drivers,2007,Deaths,63
+Taxi/Bus drivers,2007,Injuries,239
+Taxi/Bus drivers,2008,Deaths,69
+Taxi/Bus drivers,2008,Injuries,246
+Taxi/Bus drivers,2009,Deaths,45
+Taxi/Bus drivers,2009,Injuries,214
+Taxi/Bus drivers,2010,Deaths,77
+Taxi/Bus drivers,2010,Injuries,227
+Taxi/Bus drivers,2011,Deaths,29
+Taxi/Bus drivers,2011,Injuries,49
+Taxi/Bus drivers,2012,Deaths,13
+Taxi/Bus drivers,2012,Injuries,27
+Taxi/Bus drivers,2013,Deaths,56
+Taxi/Bus drivers,2013,Injuries,94
+Taxi/Bus drivers,2014,Deaths,73
+Taxi/Bus drivers,2014,Injuries,127
+Taxi/Bus drivers,2015,Deaths,4203
+Taxi/Bus drivers,2015,Injuries,7518
+Taxi/Bus drivers,2016,Deaths,4485
+Taxi/Bus drivers,2016,Injuries,8069
+Taxi/Bus drivers,2017,Deaths,4348
+Taxi/Bus drivers,2017,Injuries,6369
+Taxi/Bus drivers,2018,Deaths,4128
+Taxi/Bus drivers,2018,Injuries,5685
+Taxi/Bus drivers,2019,Deaths,3959
+Taxi/Bus drivers,2019,Injuries,6037
+Motorcyclists,2000,Deaths,3118
+Motorcyclists,2000,Injuries,30109
+Motorcyclists,2001,Deaths,2971
+Motorcyclists,2001,Injuries,30348
+Motorcyclists,2002,Deaths,3034
+Motorcyclists,2002,Injuries,29201
+Motorcyclists,2003,Deaths,3166
+Motorcyclists,2003,Injuries,30832
+Motorcyclists,2004,Deaths,3500
+Motorcyclists,2004,Injuries,35727
+Motorcyclists,2005,Deaths,3181
+Motorcyclists,2005,Injuries,27445
+Motorcyclists,2006,Deaths,3243
+Motorcyclists,2006,Injuries,16151
+Motorcyclists,2007,Deaths,3197
+Motorcyclists,2007,Injuries,14954
+Motorcyclists,2008,Deaths,3459
+Motorcyclists,2008,Injuries,14074
+Motorcyclists,2009,Deaths,3633
+Motorcyclists,2009,Injuries,13539
+Motorcyclists,2010,Deaths,3614
+Motorcyclists,2010,Injuries,12112
+Motorcyclists,2011,Deaths,3713
+Motorcyclists,2011,Injuries,10424
+Motorcyclists,2012,Deaths,3751
+Motorcyclists,2012,Injuries,9764
+Motorcyclists,2013,Deaths,3875
+Motorcyclists,2013,Injuries,7385
+Motorcyclists,2014,Deaths,3780
+Motorcyclists,2014,Injuries,7649
+Motorcyclists,2015,Deaths,71
+Motorcyclists,2015,Injuries,171
+Motorcyclists,2016,Deaths,65
+Motorcyclists,2016,Injuries,111
+Motorcyclists,2017,Deaths,62
+Motorcyclists,2017,Injuries,159
+Motorcyclists,2018,Deaths,47
+Motorcyclists,2018,Injuries,106
+Motorcyclists,2019,Deaths,55
+Motorcyclists,2019,Injuries,115
+Pillion riders,2000,Deaths,401
+Pillion riders,2000,Injuries,3542
+Pillion riders,2001,Deaths,398
+Pillion riders,2001,Injuries,3279
+Pillion riders,2002,Deaths,395
+Pillion riders,2002,Injuries,3450
+Pillion riders,2003,Deaths,382
+Pillion riders,2003,Injuries,3416
+Pillion riders,2004,Deaths,399
+Pillion riders,2004,Injuries,3704
+Pillion riders,2005,Deaths,410
+Pillion riders,2005,Injuries,3777
+Pillion riders,2006,Deaths,450
+Pillion riders,2006,Injuries,2567
+Pillion riders,2007,Deaths,449
+Pillion riders,2007,Injuries,2675
+Pillion riders,2008,Deaths,439
+Pillion riders,2008,Injuries,2527
+Pillion riders,2009,Deaths,434
+Pillion riders,2009,Injuries,2264
+Pillion riders,2010,Deaths,422
+Pillion riders,2010,Injuries,1936
+Pillion riders,2011,Deaths,456
+Pillion riders,2011,Injuries,1647
+Pillion riders,2012,Deaths,427
+Pillion riders,2012,Injuries,1543
+Pillion riders,2013,Deaths,419
+Pillion riders,2013,Injuries,1015
+Pillion riders,2014,Deaths,399
+Pillion riders,2014,Injuries,982
+Pillion riders,2015,Deaths,107
+Pillion riders,2015,Injuries,148
+Pillion riders,2016,Deaths,123
+Pillion riders,2016,Injuries,118
+Pillion riders,2017,Deaths,162
+Pillion riders,2017,Injuries,111
+Pillion riders,2018,Deaths,122
+Pillion riders,2018,Injuries,99
+Pillion riders,2019,Deaths,107
+Pillion riders,2019,Injuries,94
+Passengers,2000,Deaths,742
+Passengers,2000,Injuries,4490
+Passengers,2001,Deaths,797
+Passengers,2001,Injuries,4712
+Passengers,2002,Deaths,729
+Passengers,2002,Injuries,4445
+Passengers,2003,Deaths,827
+Passengers,2003,Injuries,5083
+Passengers,2004,Deaths,749
+Passengers,2004,Injuries,4880
+Passengers,2005,Deaths,756
+Passengers,2005,Injuries,4313
+Passengers,2006,Deaths,794
+Passengers,2006,Injuries,3283
+Passengers,2007,Deaths,819
+Passengers,2007,Injuries,3365
+Passengers,2008,Deaths,756
+Passengers,2008,Injuries,3278
+Passengers,2009,Deaths,792
+Passengers,2009,Injuries,2967
+Passengers,2010,Deaths,152
+Passengers,2010,Injuries,479
+Passengers,2011,Deaths,677
+Passengers,2011,Injuries,1928
+Passengers,2012,Deaths,549
+Passengers,2012,Injuries,2210
+Passengers,2013,Deaths,689
+Passengers,2013,Injuries,1287
+Passengers,2014,Deaths,671
+Passengers,2014,Injuries,1523
+Passengers,2015,Deaths,482
+Passengers,2015,Injuries,553
+Passengers,2016,Deaths,511
+Passengers,2016,Injuries,529
+Passengers,2017,Deaths,441
+Passengers,2017,Injuries,414
+Passengers,2018,Deaths,407
+Passengers,2018,Injuries,348
+Passengers,2019,Deaths,394
+Passengers,2019,Injuries,331
+Others,2000,Deaths,150
+Others,2000,Injuries,1276
+Others,2001,Deaths,164
+Others,2001,Injuries,1226
+Others,2002,Deaths,146
+Others,2002,Injuries,1249
+Others,2003,Deaths,130
+Others,2003,Injuries,1105
+Others,2004,Deaths,260
+Others,2004,Injuries,1952
+Others,2005,Deaths,169
+Others,2005,Injuries,1079
+Others,2006,Deaths,93
+Others,2006,Injuries,389
+Others,2007,Deaths,108
+Others,2007,Injuries,349
+Others,2008,Deaths,85
+Others,2008,Injuries,334
+Others,2009,Deaths,75
+Others,2009,Injuries,291
+Others,2010,Deaths,166
+Others,2010,Injuries,412
+Others,2011,Deaths,308
+Others,2011,Injuries,733
+Others,2012,Deaths,147
+Others,2012,Injuries,354
+Others,2013,Deaths,284
+Others,2013,Injuries,547
+Others,2014,Deaths,161
+Others,2014,Injuries,227
+Others,2015,Deaths,112
+Others,2015,Injuries,179
+Others,2016,Deaths,122
+Others,2016,Injuries,170
+Others,2017,Deaths,123
+Others,2017,Injuries,227
+Others,2018,Deaths,94
+Others,2018,Injuries,191
+Others,2019,Deaths,108
+Others,2019,Injuries,246
