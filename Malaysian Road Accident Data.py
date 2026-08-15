@@ -62,10 +62,10 @@ def load_and_clean_data():
         diff_rows = overlap[overlap[f'{col}_excel'] != overlap[f'{col}_csv']]
         if not diff_rows.empty:
             diff_found = True
-            print(f"⚠️ Differences found in column '{col}': {len(diff_rows)} rows mismatch.")
+            print(f"WARNING: Differences found in column '{col}': {len(diff_rows)} rows mismatch.")
             print(diff_rows[key_cols + [f'{col}_excel', f'{col}_csv']].head())
     if not diff_found:
-        print("✅ All 126 overlapping rows match perfectly across all columns!")
+        print("All 126 overlapping rows match perfectly across all columns.")
 
     # Concatenate and remove duplicates based on the primary keys
     df_combined = pd.concat([df_stat1_clean, df_stat2_clean], ignore_index=True)
@@ -341,6 +341,104 @@ def ml_predict_rq1(df_veh):
     
     return df_metrics, df_predictions
 
+def ml_predict_rq2(df_stat):
+    #RQ2 Machine Learning Forecast:
+    #Which specific accident classification trends over the years in
+    #reported road accidents in Malaysia?
+
+    #Forecasts the national-level yearly count (Jumlah) for each of the
+    #three accident classifications (KST cases opened, Fatal accidents,
+    #Deaths) using Linear Regression, trained on the full 2016-2021
+    #national trend (joined from the 2016-2019 and 2017-2021 sources).
+
+    print("\n" + "=" * 60)
+    print("  RQ2 MACHINE LEARNING: ACCIDENT CLASSIFICATION FORECASTING")
+    print("=" * 60)
+
+    # --- Step 1: National aggregation per Year x Classification ---
+    class_trend = df_stat.groupby(['Tahun', 'Klasifikasi Kemalangan'])['Jumlah'].sum().unstack()
+
+    kst_col = 'Kes Siasatan Trafik (KST) Kemalangan Jalan Raya Dibuka'
+    fatal_col = 'Kemalangan Maut'
+    death_col = 'Kematian'
+    classifications = [kst_col, fatal_col, death_col]
+
+    # --- Step 2: Feature Engineering - Fatality Rate trend ---
+    # Deaths per KST case opened, expressed as a percentage.
+    class_trend['Fatality_Rate_Pct'] = (class_trend[death_col] / class_trend[kst_col]) * 100
+    class_trend.to_csv('outputs/feature_rq2_classification_trend.csv')
+
+    print("\nNational Classification Trend (with Fatality Rate feature):")
+    print(class_trend.round(2).to_string())
+
+    # --- Step 3 & 4: Forecast target - Linear Regression per classification ---
+    train = class_trend.dropna(subset=classifications)
+    X_train = train.index.values.reshape(-1, 1)
+
+    future_years = np.array([2022, 2023, 2024]).reshape(-1, 1)
+
+    metrics_list = []
+    future_preds = {'Year': future_years.flatten()}
+
+    for cls in classifications:
+        y_train = train[cls].values
+
+        model = LinearRegression()
+        model.fit(X_train, y_train)
+
+        # In-sample evaluation
+        y_pred = model.predict(X_train)
+
+        # --- Step 5: Success metrics ---
+        metrics_list.append({
+            'Classification': cls,
+            'RMSE': round(np.sqrt(mean_squared_error(y_train, y_pred)), 2),
+            'MAE': round(mean_absolute_error(y_train, y_pred), 2),
+            'R2_Score': round(r2_score(y_train, y_pred), 4)
+        })
+
+        preds = model.predict(future_years)
+        future_preds[cls] = np.maximum(0, preds.round(0))
+
+    df_metrics = pd.DataFrame(metrics_list)
+    df_predictions = pd.DataFrame(future_preds)
+
+    df_metrics.to_csv('outputs/rq2_model_evaluation_metrics.csv', index=False)
+    df_predictions.to_csv('outputs/rq2_future_classification_predictions.csv', index=False)
+
+    print("\n--- Model Success Metrics (trained on 2016-2021 national trend) ---")
+    print(df_metrics.to_string(index=False))
+
+    print("\n--- Forecasted Classification Counts (2022-2024) ---")
+    print(df_predictions.to_string(index=False))
+
+    # --- Visualization: Actual vs Forecast per classification ---
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+    colors = {'Actual': 'darkblue', 'Forecast': 'tab:red'}
+
+    for ax, cls in zip(axes, classifications):
+        ax.plot(train.index, train[cls], marker='o', linewidth=2,
+                color=colors['Actual'], label='Actual')
+
+        plot_years = np.append([train.index.max()], future_years.flatten())
+        plot_vals = np.append([train[cls].iloc[-1]], df_predictions[cls].values)
+        ax.plot(plot_years, plot_vals, linestyle='--', marker='s', linewidth=2,
+                color=colors['Forecast'], label='Forecast')
+
+        ax.set_title(cls, fontsize=10, fontweight='bold')
+        ax.set_xlabel('Year')
+        ax.set_ylabel('Count')
+        ax.legend()
+
+    plt.suptitle('Figure 7: RQ2 Linear Regression Forecast by Accident Classification (2016-2024)',
+                  fontsize=12, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig('visualizations/fig7_rq2_ml_predictions.png')
+    plt.close()
+    print("[PLOT SAVED] visualizations/fig7_rq2_ml_predictions.png")
+
+    return df_metrics, df_predictions
+
 def main():
     #Main execution function.
     setup_directories()
@@ -350,6 +448,7 @@ def main():
     ml_predict_rq1(df_veh)
     #RQ2
     process_rq2(df_inj, df_stat)
+    ml_predict_rq2(df_stat)
     #RQ3
     process_rq3(df_stat)
     print("\n[SUCCESS] Analytical pipeline execution complete. All outputs and figures saved.")
