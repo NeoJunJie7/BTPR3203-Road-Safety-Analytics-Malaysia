@@ -1,9 +1,3 @@
-"""
-BTPR3203 - Python for Data Science (Project Submission)
-Script: main_analysis.py
-Title: Analyzing Road Safety Dynamics in Malaysia: Vehicle Involvement, Severity Classifications, and Population-Normalized Geographic Hotspots
-"""
-
 import os
 import pandas as pd
 import numpy as np
@@ -16,13 +10,13 @@ plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.
 plt.rcParams.update({'font.size': 10, 'figure.dpi': 300})
 
 def setup_directories():
-    """Ensure output folders exist for processed files and visualizations."""
+    #Ensure output folders exist for processed files and visualizations.
     os.makedirs('outputs', exist_ok=True)
     os.makedirs('visualizations', exist_ok=True)
     print("[INFO] Output directories initialized.")
 
 def load_and_clean_data():
-    """Load raw datasets, clean formatting, and convert data types."""
+    #Load raw datasets, clean formatting, and convert data types.
     print("[INFO] Loading datasets...")
     
     # 1. Load Vehicle Dataset
@@ -35,9 +29,49 @@ def load_and_clean_data():
     df_inj['Condition'] = df_inj['Condition'].str.strip()
     
     # 3. Load State Statistics Dataset
-    df_stat = pd.read_csv('dataset/STATISTIK KEMALANGAN, KEMALANGAN MAUT DAN KEMATIAN.csv')
-    df_stat['Negeri'] = df_stat['Negeri'].str.strip()
-    df_stat['Klasifikasi Kemalangan'] = df_stat['Klasifikasi Kemalangan'].str.strip()
+    df_stat1 = pd.read_csv('dataset/STATISTIK KEMALANGAN, KEMALANGAN MAUT DAN KEMATIAN.csv')
+    df_stat1 = df_stat1.dropna(how='all', axis=1)
+
+    df_stat2 = pd.read_excel('dataset/Statistik Kemalangan, Kemalangan Maut Dan Kematian.xlsx', header=1)
+
+    key_cols = ['Tahun', 'Negeri', 'Klasifikasi Kemalangan']
+    num_cols = ['Lebuh Raya', 'Jalan Persekutuan', 'Jalan Negeri', 'Jalan Bandaran', 'Lain-lain Jalan', 'Jumlah']
+
+    # Clean state datasets
+    def clean_dataframe(df):
+        df = df.dropna(subset=['Tahun']).copy()
+        # Strip whitespace from column names
+        df.columns = df.columns.str.strip()
+        # Clean and cast key columns
+        df['Tahun'] = df['Tahun'].astype(int)
+        df['Negeri'] = df['Negeri'].astype(str).str.strip()
+        df['Klasifikasi Kemalangan'] = df['Klasifikasi Kemalangan'].astype(str).str.strip()
+        # Clean numeric columns (remove commas like '1,029' -> 1029)
+        for col in num_cols:
+            df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '').str.strip(), errors='coerce')
+        return df
+
+    df_stat1_clean = clean_dataframe(df_stat1)
+    df_stat2_clean = clean_dataframe(df_stat2)
+
+    # Compare overlapping records
+    overlap = pd.merge(df_stat1_clean, df_stat2_clean, on=key_cols, suffixes=('_excel', '_csv'))
+    diff_found = False
+    for col in num_cols:
+        diff_rows = overlap[overlap[f'{col}_excel'] != overlap[f'{col}_csv']]
+        if not diff_rows.empty:
+            diff_found = True
+            print(f"⚠️ Differences found in column '{col}': {len(diff_rows)} rows mismatch.")
+            print(diff_rows[key_cols + [f'{col}_excel', f'{col}_csv']].head())
+    if not diff_found:
+        print("✅ All 126 overlapping rows match perfectly across all columns!")
+
+    # Concatenate and remove duplicates based on the primary keys
+    df_combined = pd.concat([df_stat1_clean, df_stat2_clean], ignore_index=True)
+    df_stat = df_combined.drop_duplicates(subset=key_cols, keep='last')
+
+    # Sort chronologically and by location
+    df_stat = df_stat.sort_values(by=['Tahun', 'Negeri', 'Klasifikasi Kemalangan']).reset_index(drop=True)
     
     # Clean commas and convert object columns to numeric in State dataset
     num_cols = ['Lebuh Raya', 'Jalan Persekutuan', 'Jalan Negeri', 'Jalan Bandaran', 'Lain-lain Jalan', 'Jumlah']
@@ -52,9 +86,8 @@ def load_and_clean_data():
     return df_veh, df_inj, df_stat
 
 def process_rq1(df_veh):
-    """
-    RQ1: Vehicle involvement analysis and longitudinal distribution.
-    """
+    #RQ1: Vehicle involvement analysis and longitudinal distribution.
+    
     print("\n--- Processing RQ1: Vehicle Types Analysis ---")
     
     # Total involvement summary across all years
@@ -87,9 +120,8 @@ def process_rq1(df_veh):
     print("[PLOT SAVED] visualizations/fig1_vehicle_trends.png")
 
 def process_rq2(df_inj, df_stat):
-    """
-    RQ2: Accident classification trends (Deaths vs. Injuries & State Classifications).
-    """
+    #RQ2: Accident classification trends (Deaths vs. Injuries & State Classifications).
+
     print("\n--- Processing RQ2: Accident Severity & Classifications ---")
     
     # Aggregate Deaths vs. Injuries
@@ -106,10 +138,10 @@ def process_rq2(df_inj, df_stat):
     inj_trend.to_csv('outputs/processed_deaths_and_injuries_trend.csv')
     print("[OUTPUT SAVED] outputs/processed_deaths_and_injuries_trend.csv")
     
-    # State classification national aggregation (2017-2021)
+    # State classification national aggregation (2016-2021)
     stat_trend = df_stat.groupby(['Tahun', 'Klasifikasi Kemalangan'])['Jumlah'].sum().unstack()
-    stat_trend.to_csv('outputs/processed_national_classification_2017_2021.csv')
-    print("[OUTPUT SAVED] outputs/processed_national_classification_2017_2021.csv")
+    stat_trend.to_csv('outputs/processed_national_classification_2016_2021.csv')
+    print("[OUTPUT SAVED] outputs/processed_national_classification_2016_2021.csv")
     
     # Plotting Figure 2: Deaths vs Injuries dual axis
     fig, ax1 = plt.subplots(figsize=(10, 5))
@@ -139,7 +171,7 @@ def process_rq2(df_inj, df_stat):
     # Plotting Figure 3: Traffic Investigation Cases Trend
     plt.figure(figsize=(9, 5))
     plt.plot(stat_trend.index, stat_trend['Kes Siasatan Trafik (KST) Kemalangan Jalan Raya Dibuka'], marker='o', linewidth=2, color='darkblue')
-    plt.title('Figure 3: Total Reported Traffic Investigation Cases in Malaysia (2017–2021)', fontsize=12, fontweight='bold')
+    plt.title('Figure 3: Total Reported Traffic Investigation Cases in Malaysia (2016–2021)', fontsize=12, fontweight='bold')
     plt.xlabel('Year')
     plt.ylabel('Total Cases Opened')
     plt.xticks(stat_trend.index)
@@ -149,9 +181,8 @@ def process_rq2(df_inj, df_stat):
     print("[PLOT SAVED] visualizations/fig3_traffic_cases_trend.png")
 
 def process_rq3(df_stat):
-    """
-    RQ3: State concentration analysis normalized by population metrics using state_population_2019.csv.
-    """
+    #RQ3: State concentration analysis normalized by population metrics using state_population_2019.csv.
+    
     print("\n--- Processing RQ3: Population-Normalized State Hotspots ---")
     
     # 1. Filter 2019 accident baseline data
@@ -231,7 +262,7 @@ def process_rq3(df_stat):
     print("[PLOT SAVED] visualizations/fig5_state_fatalities_normalized.png")
 
 def main():
-    """Main execution function."""
+    #Main execution function.
     setup_directories()
     df_veh, df_inj, df_stat = load_and_clean_data()
     process_rq1(df_veh)
