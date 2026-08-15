@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 # Set overall plot aesthetics
 plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available else 'default')
@@ -261,12 +262,95 @@ def process_rq3(df_stat):
     plt.close()
     print("[PLOT SAVED] visualizations/fig5_state_fatalities_normalized.png")
 
+def ml_predict_rq1(df_veh):
+    #RQ1 Machine Learning Forecast:
+    #Trained on the modern stabilized period (2010-2019) to prevent distortion
+    #from pre-2005 administrative reporting changes.
+
+    print("\n" + "="*60)
+    print("  RQ1 MACHINE LEARNING: REALISTIC VEHICLE FORECASTING")
+    print("="*60)
+    
+    veh_pivot = df_veh.pivot(index='Year', columns='Type of Vehicle', values='Value')
+    
+    # Feature Engineering: Historical Growth
+    veh_growth = veh_pivot.pct_change() * 100
+    veh_growth.to_csv('outputs/feature_vehicle_growth_rates.csv')
+    
+    # Target Years
+    future_years = np.array([2024, 2025, 2026]).reshape(-1, 1)
+    
+    # Train on Modern Baseline (2010-2019)
+    train_pivot = veh_pivot.loc[2010:2019]
+    X_train = train_pivot.index.values.reshape(-1, 1)
+    
+    metrics_list = []
+    future_preds = {'Year': [2024, 2025, 2026]}
+    
+    for vehicle in veh_pivot.columns:
+        y_train = train_pivot[vehicle].values
+        
+        model = LinearRegression()
+        model.fit(X_train, y_train)
+        
+        # In-sample Evaluation
+        y_pred = model.predict(X_train)
+        metrics_list.append({
+            'Vehicle_Type': vehicle,
+            'R2_Score': round(r2_score(y_train, y_pred), 4),
+            'RMSE': round(np.sqrt(mean_squared_error(y_train, y_pred)), 2),
+            'MAE': round(mean_absolute_error(y_train, y_pred), 2)
+        })
+        
+        # Future Predictions
+        preds = model.predict(future_years)
+        future_preds[vehicle] = np.maximum(0, preds.round(0))
+        
+    df_metrics = pd.DataFrame(metrics_list)
+    df_predictions = pd.DataFrame(future_preds)
+    
+    df_metrics.to_csv('outputs/rq1_model_evaluation_metrics.csv', index=False)
+    df_predictions.to_csv('outputs/rq1_future_vehicle_predictions.csv', index=False)
+    
+    print("\n--- Model Success Metrics (2010-2019 Regime) ---")
+    print(df_metrics.to_string(index=False))
+    
+    print("\n--- Corrected Future Predictions (2024-2026) ---")
+    print(df_predictions.to_string(index=False))
+    
+    # Visualization: Top 5 Vehicles with Continuous Trend
+    top_5 = ['Motorcycle', 'Motorcar', 'Pedestrian', 'Bicycle', 'Others']
+    
+    plt.figure(figsize=(10, 5))
+    for v in top_5:
+        # Plot historical line
+        plt.plot(veh_pivot.index, veh_pivot[v], marker='o', label=f'{v} (Actual)', alpha=0.7)
+        # Connect last actual point (2019) to future predictions
+        plot_years = np.append([2019], future_years.flatten())
+        plot_vals = np.append([veh_pivot.loc[2019, v]], df_predictions[v].values)
+        plt.plot(plot_years, plot_vals, linestyle='--', marker='s', label=f'{v} (Forecast)')
+        
+    plt.title('Figure 6: Corrected ML Linear Regression Forecast for Top Vehicle Types (2000–2026)', fontsize=11, fontweight='bold')
+    plt.xlabel('Year')
+    plt.ylabel('Reported Accidents / Involvements')
+    plt.legend(title='Vehicle Type', bbox_to_anchor=(1.02, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig('visualizations/fig6_rq1_ml_predictions.png')
+    plt.close()
+    print("[PLOT SAVED] visualizations/fig6_rq1_ml_predictions.png")
+    
+    return df_metrics, df_predictions
+
 def main():
     #Main execution function.
     setup_directories()
     df_veh, df_inj, df_stat = load_and_clean_data()
+    #RQ1
     process_rq1(df_veh)
+    ml_predict_rq1(df_veh)
+    #RQ2
     process_rq2(df_inj, df_stat)
+    #RQ3
     process_rq3(df_stat)
     print("\n[SUCCESS] Analytical pipeline execution complete. All outputs and figures saved.")
 
