@@ -1,0 +1,4 @@
+Classification,RMSE,MAE,R2_Score
+Kes Siasatan Trafik (KST) Kemalangan Jalan Raya Dibuka,84819.69,73041.32,0.5475
+Kemalangan Maut,590.23,494.71,0.8303
+Kematian,625.88,528.29,0.8406
