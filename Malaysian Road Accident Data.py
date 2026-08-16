@@ -263,83 +263,134 @@ def process_rq3(df_stat):
     plt.close()
     print("[PLOT SAVED] visualizations/fig5_state_fatalities_normalized.png")
 
-def ml_predict_rq1(df_veh):
-    #RQ1 Machine Learning Forecast:
-    #Trained on the modern stabilized period (2010-2019) to prevent distortion
-    #from pre-2005 administrative reporting changes.
+def ml_predict_rq1(df_veh, train_years=(2010, 2019), forecast_years=range(2020, 2027)):
+    # RQ1 Machine Learning Forecast:
+    # How has the involvement of different vehicle types in reported road
+    # accidents changed over time, and what does the modern trend imply
+    # going forward?
 
-    print("\n" + "="*60)
-    print("  RQ1 MACHINE LEARNING: REALISTIC VEHICLE FORECASTING")
-    print("="*60)
-    
+    # Fits one Linear Regression per vehicle type on the stabilized modern
+    # reporting regime (2010-2019 by default) and forecasts forward.
+
+    print("\n" + "=" * 60)
+    print("  RQ1 MACHINE LEARNING: VEHICLE TYPE INVOLVEMENT FORECASTING")
+    print("=" * 60)
+    baseline_start, baseline_end = train_years
+    print(f"  Historical data available : {df_veh['Year'].min()}-{df_veh['Year'].max()} (full range, plotted for context)")
+    print(f"  Model trained on          : {baseline_start}-{baseline_end} (stabilized modern regime)")
+    print(f"  Forecast horizon          : {min(forecast_years)}-{max(forecast_years)} (continuous, unconstrained trend extrapolation)")
+    print("=" * 60)
+
     veh_pivot = df_veh.pivot(index='Year', columns='Type of Vehicle', values='Value')
-    
+
     # Feature Engineering: Historical Growth
     veh_growth = veh_pivot.pct_change() * 100
     veh_growth.to_csv('outputs/feature_vehicle_growth_rates.csv')
-    
-    # Target Years
-    future_years = np.array([2024, 2025, 2026]).reshape(-1, 1)
-    
-    # Train on Modern Baseline (2010-2019)
-    train_pivot = veh_pivot.loc[2010:2019]
+
+    # --- Train on the stabilized modern baseline only ---
+    train_pivot = veh_pivot.loc[baseline_start:baseline_end]
     X_train = train_pivot.index.values.reshape(-1, 1)
-    
+
+    # --- Continuous forecast horizon, no gap after the training window ---
+    future_years = np.array(list(forecast_years)).reshape(-1, 1)
+
     metrics_list = []
-    future_preds = {'Year': [2024, 2025, 2026]}
-    
+    future_preds = {'Year': future_years.flatten()}
+    models_by_vehicle = {}
+
     for vehicle in veh_pivot.columns:
         y_train = train_pivot[vehicle].values
-        
+
         model = LinearRegression()
         model.fit(X_train, y_train)
-        
-        # In-sample Evaluation
+        models_by_vehicle[vehicle] = model
+
+        # In-sample Evaluation (baseline window only)
         y_pred = model.predict(X_train)
         metrics_list.append({
             'Vehicle_Type': vehicle,
+            'Train_Window': f'{baseline_start}-{baseline_end}',
             'R2_Score': round(r2_score(y_train, y_pred), 4),
             'RMSE': round(np.sqrt(mean_squared_error(y_train, y_pred)), 2),
             'MAE': round(mean_absolute_error(y_train, y_pred), 2)
         })
-        
-        # Future Predictions
+
+        # Future Predictions, floored at zero
         preds = model.predict(future_years)
         future_preds[vehicle] = np.maximum(0, preds.round(0))
-        
+
     df_metrics = pd.DataFrame(metrics_list)
     df_predictions = pd.DataFrame(future_preds)
-    
+
     df_metrics.to_csv('outputs/rq1_model_evaluation_metrics.csv', index=False)
     df_predictions.to_csv('outputs/rq1_future_vehicle_predictions.csv', index=False)
-    
-    print("\n--- Model Success Metrics (2010-2019 Regime) ---")
+
+    print(f"\n--- Baseline Fit Quality ({baseline_start}-{baseline_end}) ---")
     print(df_metrics.to_string(index=False))
-    
-    print("\n--- Corrected Future Predictions (2024-2026) ---")
+
+    print(f"\n--- Forecasted Vehicle Involvement ({min(forecast_years)}-{max(forecast_years)}) ---")
     print(df_predictions.to_string(index=False))
-    
-    # Visualization: Top 5 Vehicles with Continuous Trend
+
+    # --- Visualization: 2010-2026 focus, clean Actual/Forecast styling ---
     top_5 = ['Motorcycle', 'Motorcar', 'Pedestrian', 'Bicycle', 'Others']
-    
-    plt.figure(figsize=(10, 5))
+    palette = plt.cm.tab10.colors
+    vehicle_colors = {v: palette[i] for i, v in enumerate(top_5)}
+
+    fig, ax = plt.subplots(figsize=(11, 6.5))
+
+    # Focus window: modern regime (2010) through the end of the forecast horizon.
+    # Full 2000-2009 history is intentionally excluded from this plot (see rationale
+    # above) so that modern trajectories aren't squashed by the pre-2005 reporting spike.
+    plot_pivot = veh_pivot.loc[baseline_start:]
+
+    # Shade nothing here (no excluded-but-plotted period like RQ2/RQ3 — 2010-2019 IS the
+    # training window), but mark the observed/forecast boundary clearly.
+    ax.axvline(x=baseline_end + 0.5, color='gray', linestyle=':', linewidth=1.2, zorder=0)
+
     for v in top_5:
-        # Plot historical line
-        plt.plot(veh_pivot.index, veh_pivot[v], marker='o', label=f'{v} (Actual)', alpha=0.7)
-        # Connect last actual point (2019) to future predictions
-        plot_years = np.append([2019], future_years.flatten())
-        plot_vals = np.append([veh_pivot.loc[2019, v]], df_predictions[v].values)
-        plt.plot(plot_years, plot_vals, linestyle='--', marker='s', label=f'{v} (Forecast)')
-        
-    plt.title('Figure 6: Corrected ML Linear Regression Forecast for Top Vehicle Types (2000–2026)', fontsize=11, fontweight='bold')
-    plt.xlabel('Year')
-    plt.ylabel('Reported Accidents / Involvements')
-    plt.legend(title='Vehicle Type', bbox_to_anchor=(1.02, 1), loc='upper left')
-    plt.tight_layout()
-    plt.savefig('visualizations/fig6_rq1_ml_predictions.png')
+        color = vehicle_colors[v]
+
+        # Actual: solid line, circle markers, 2010-2019 only (the trained, stabilized regime)
+        ax.plot(plot_pivot.loc[:baseline_end].index, plot_pivot.loc[:baseline_end, v],
+                color=color, marker='o', linewidth=2, zorder=3)
+
+        # Forecast: dashed line, square markers, anchored at the model's FITTED 2019
+        # value (not the actual 2019 point) so the line has no kink at the boundary.
+        model = models_by_vehicle[v]
+        anchor_val = model.predict([[baseline_end]])[0]
+        forecast_x = np.concatenate([[baseline_end], future_years.flatten()])
+        forecast_y = np.concatenate([[anchor_val], df_predictions[v].values])
+        ax.plot(forecast_x, forecast_y, color=color, marker='s', linestyle='--',
+                linewidth=2, alpha=0.7, zorder=2)
+
+    ax.set_title('Figure 6: RQ1 Linear Regression Forecast for Top 5 Vehicle Types',
+                  fontsize=12, fontweight='bold')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Reported Accidents / Involvements')
+    ax.set_xlim(baseline_start - 0.5, max(forecast_years) + 0.5)
+
+    # Grouped legend: vehicle color swatches + a separate Actual/Forecast style key
+    vehicle_handles = [Line2D([0], [0], color=vehicle_colors[v], marker='o', linewidth=2, label=v)
+                        for v in top_5]
+    style_handles = [
+        Line2D([0], [0], color='black', linestyle='-', marker='o',
+               label=f'Actual ({baseline_start}-{baseline_end})'),
+        Line2D([0], [0], color='black', linestyle='--', marker='s', alpha=0.7,
+               label=f'Forecast (from {baseline_end} baseline)')
+    ]
+    ax.legend(handles=vehicle_handles + style_handles, fontsize=8, loc='upper left',
+              bbox_to_anchor=(1.02, 1))
+
+    fig.text(0.5, 0.955,
+              f'Trained on {baseline_start}-{baseline_end} only (pre-2010 reporting-regime shift excluded); '
+              f'dotted line marks the forecast boundary',
+              ha='center', fontsize=8.5, style='italic', color='dimgray')
+
+    plt.tight_layout(rect=[0, 0, 0.85, 0.94])
+    plt.savefig('visualizations/fig6_rq1_ml_predictions.png', dpi=150)
     plt.close()
     print("[PLOT SAVED] visualizations/fig6_rq1_ml_predictions.png")
-    
+
     return df_metrics, df_predictions
 
 def ml_predict_rq2(df_stat):
@@ -629,7 +680,7 @@ def main():
     df_veh, df_inj, df_stat = load_and_clean_data()
     #RQ1
     process_rq1(df_veh)
-    ml_predict_rq1(df_veh)
+    ml_predict_rq1(df_veh, train_years=(2010, 2019), forecast_years=range(2020, 2027))
     #RQ2
     process_rq2(df_inj, df_stat)
     ml_predict_rq2(df_stat)
