@@ -116,6 +116,7 @@ def process_rq1(df_veh):
     plt.xlabel('Year')
     plt.ylabel('Number of Vehicles Involved')
     plt.legend(title='Vehicle Type')
+    plt.xticks(range(2000, 2020, 2))
     plt.tight_layout()
     plt.savefig('visualizations/fig1_vehicle_trends.png')
     plt.close()
@@ -163,6 +164,7 @@ def process_rq2(df_inj, df_stat):
     lines = line1 + line2
     labels = [l.get_label() for l in lines]
     ax1.legend(lines, labels, loc='center right')
+    ax1.set_xticks(range(2000, 2020, 2))
     
     plt.title('Figure 2: Road Accident Severity Trend in Malaysia (2000–2019): Deaths vs Injuries', fontsize=12, fontweight='bold')
     plt.tight_layout()
