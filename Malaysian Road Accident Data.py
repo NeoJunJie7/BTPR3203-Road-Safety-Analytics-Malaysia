@@ -395,18 +395,21 @@ def ml_predict_rq1(df_veh, train_years=(2010, 2019), forecast_years=range(2020, 
 
     return df_metrics, df_predictions
 
-def ml_predict_rq2(df_stat):
-    #RQ2 Machine Learning Forecast:
-    #Which specific accident classification trends over the years in
-    #reported road accidents in Malaysia?
+def ml_predict_rq2(df_stat, train_years=(2016, 2019), forecast_years=range(2022, 2027)):
+    # RQ2 Machine Learning Forecast:
+    # Which specific accident classification trends over the years in
+    # reported road accidents in Malaysia?
 
-    #Forecasts the national-level yearly count (Jumlah) for each of the
-    #three accident classifications (KST cases opened, Fatal accidents,
-    #Deaths) using Linear Regression, trained on the full 2016-2021
-    #national trend (joined from the 2016-2019 and 2017-2021 sources).
+    # Aggregates national yearly totals (Jumlah) per accident classification,
+    # then fits one Linear Regression per classification to forecast each
+    # forward.
 
     print("\n" + "=" * 60)
     print("  RQ2 MACHINE LEARNING: ACCIDENT CLASSIFICATION FORECASTING")
+    print("=" * 60)
+    print("  Historical data available : 2016-2021 (full range, plotted for context)")
+    print(f"  Model trained on          : {train_years[0]}-{train_years[1]} (pre-pandemic baseline)")
+    print(f"  Forecast horizon          : {min(forecast_years)}-{max(forecast_years)} (unconstrained trend extrapolation)")
     print("=" * 60)
 
     # --- Step 1: National aggregation per Year x Classification ---
@@ -422,30 +425,35 @@ def ml_predict_rq2(df_stat):
     class_trend['Fatality_Rate_Pct'] = (class_trend[death_col] / class_trend[kst_col]) * 100
     class_trend.to_csv('outputs/feature_rq2_classification_trend.csv')
 
-    print("\nNational Classification Trend (with Fatality Rate feature):")
+    print("\nNational Classification Trend (full history, with Fatality Rate feature):")
     print(class_trend.round(2).to_string())
 
     # --- Step 3 & 4: Forecast target - Linear Regression per classification ---
-    train = class_trend.dropna(subset=classifications)
+    # Fitted ONLY on the pre-pandemic baseline window (train_years).
+    baseline_start, baseline_end = train_years
+    train = class_trend.loc[baseline_start:baseline_end].dropna(subset=classifications)
     X_train = train.index.values.reshape(-1, 1)
 
-    future_years = np.array([2022, 2023, 2024]).reshape(-1, 1)
+    future_years = np.array(list(forecast_years)).reshape(-1, 1)
 
     metrics_list = []
     future_preds = {'Year': future_years.flatten()}
+    models_by_cls = {}
 
     for cls in classifications:
         y_train = train[cls].values
 
         model = LinearRegression()
         model.fit(X_train, y_train)
+        models_by_cls[cls] = model
 
-        # In-sample evaluation
+        # In-sample evaluation on the baseline window only (not pandemic-distorted)
         y_pred = model.predict(X_train)
 
         # --- Step 5: Success metrics ---
         metrics_list.append({
             'Classification': cls,
+            'Train_Window': f'{baseline_start}-{baseline_end}',
             'RMSE': round(np.sqrt(mean_squared_error(y_train, y_pred)), 2),
             'MAE': round(mean_absolute_error(y_train, y_pred), 2),
             'R2_Score': round(r2_score(y_train, y_pred), 4)
@@ -460,34 +468,59 @@ def ml_predict_rq2(df_stat):
     df_metrics.to_csv('outputs/rq2_model_evaluation_metrics.csv', index=False)
     df_predictions.to_csv('outputs/rq2_future_classification_predictions.csv', index=False)
 
-    print("\n--- Model Success Metrics (trained on 2016-2021 national trend) ---")
+    print(f"\n--- Baseline Fit Quality ({baseline_start}-{baseline_end}, pandemic-free) ---")
     print(df_metrics.to_string(index=False))
 
-    print("\n--- Forecasted Classification Counts (2022-2024) ---")
+    print(f"\n--- Forecasted Classification Counts ({min(forecast_years)}-{max(forecast_years)}) ---")
     print(df_predictions.to_string(index=False))
 
-    # --- Visualization: Actual vs Forecast per classification ---
-    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
-    colors = {'Actual': 'darkblue', 'Forecast': 'tab:red'}
+    # --- Visualization: Actual (full history) vs Forecast (from baseline) per classification ---
+    fig, axes = plt.subplots(1, 3, figsize=(17, 5.5))
+    actual_color = 'darkblue'
+    forecast_color = 'tab:red'
 
     for ax, cls in zip(axes, classifications):
-        ax.plot(train.index, train[cls], marker='o', linewidth=2,
-                color=colors['Actual'], label='Actual')
+        # Shade the pandemic-affected window that was EXCLUDED from training
+        ax.axvspan(2020, 2021, color='gray', alpha=0.12, zorder=0)
 
-        plot_years = np.append([train.index.max()], future_years.flatten())
-        plot_vals = np.append([train[cls].iloc[-1]], df_predictions[cls].values)
-        ax.plot(plot_years, plot_vals, linestyle='--', marker='s', linewidth=2,
-                color=colors['Forecast'], label='Forecast')
+        # Vertical divider marking the boundary between observed and forecast periods
+        ax.axvline(x=(2021 + min(forecast_years)) / 2, color='gray', linestyle=':', linewidth=1.2, zorder=0)
+
+        # Actual: full observed history 2016-2021 (includes the real pandemic dip, for
+        # transparency) plotted as one continuous solid line.
+        ax.plot(class_trend.index, class_trend[cls], color=actual_color, marker='o',
+                linewidth=2, zorder=3, label='Actual (2016-2021)')
+
+        # Forecast: a SEPARATE line segment anchored at the model's fitted value for
+        # the last baseline year (not the actual, pandemic-depressed value), so it
+        # continues the pre-pandemic slope cleanly instead of kinking off the dip.
+        model = models_by_cls[cls]
+        anchor_year = baseline_end
+        anchor_val = model.predict([[anchor_year]])[0]
+        forecast_x = np.concatenate([[anchor_year], future_years.flatten()])
+        forecast_y = np.concatenate([[anchor_val], df_predictions[cls].values])
+        ax.plot(forecast_x, forecast_y, color=forecast_color, marker='s', linestyle='--',
+                linewidth=2, alpha=0.75, zorder=2, label=f'Forecast (from {baseline_end} baseline)')
+
+        # In-sample fit quality annotated directly on the subplot
+        row = df_metrics[df_metrics['Classification'] == cls].iloc[0]
+        ax.text(0.03, 0.05,
+                f"R\u00b2={row['R2_Score']:.3f}\nRMSE={row['RMSE']:,.0f}\nMAE={row['MAE']:,.0f}",
+                transform=ax.transAxes, fontsize=8, va='bottom', ha='left',
+                bbox=dict(boxstyle='round', facecolor='white', edgecolor='lightgray', alpha=0.85))
 
         ax.set_title(cls, fontsize=10, fontweight='bold')
         ax.set_xlabel('Year')
         ax.set_ylabel('Count')
-        ax.legend()
+        ax.legend(fontsize=8, loc='upper right')
 
-    plt.suptitle('Figure 7: RQ2 Linear Regression Forecast by Accident Classification (2016-2024)',
-                  fontsize=12, fontweight='bold')
-    plt.tight_layout()
-    plt.savefig('visualizations/fig7_rq2_ml_predictions.png')
+    fig.text(0.5, 0.94,
+              'Pandemic period (2020-2021) shaded gray: excluded from model training, shown for context only',
+              ha='center', fontsize=8.5, style='italic', color='dimgray')
+    plt.suptitle('Figure 7: RQ2 Linear Regression Forecast by Accident Classification',
+                  fontsize=12, fontweight='bold', y=0.99)
+    plt.tight_layout(rect=[0, 0, 1, 0.92])
+    plt.savefig('visualizations/fig7_rq2_ml_predictions.png', dpi=150)
     plt.close()
     print("[PLOT SAVED] visualizations/fig7_rq2_ml_predictions.png")
 
@@ -685,10 +718,10 @@ def main():
     ml_predict_rq1(df_veh, train_years=(2010, 2019), forecast_years=range(2020, 2027))
     #RQ2
     process_rq2(df_inj, df_stat)
-    ml_predict_rq2(df_stat)
+    ml_predict_rq2(df_stat, train_years=(2016, 2019), forecast_years=range(2022, 2027))
     #RQ3
     process_rq3(df_stat)
-    ml_predict_rq3(df_stat)
+    ml_predict_rq3(df_stat, train_years=(2016, 2019), forecast_years=range(2022, 2027))
     print("\n[SUCCESS] Analytical pipeline execution complete. All outputs and figures saved.")
 
 if __name__ == "__main__":
